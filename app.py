@@ -31,7 +31,7 @@ def fetch_gpt_info():
     for tweet in tweets:
         response = openai.Completion.create(
             engine="text-davinci-002",
-            prompt=f"Translate the following information about ChatGPT from English to Japanese: {tweet}",
+            prompt=f"Translate and summarize the following information about ChatGPT from English to Japanese in an easy-to-understand manner: {tweet}",
             max_tokens=100,
             n=1,
             stop=None,
