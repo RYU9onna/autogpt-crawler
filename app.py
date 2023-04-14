@@ -1,8 +1,6 @@
 from flask import Flask, render_template
 import os
 import tweepy
-import googletrans
-from googletrans import Translator
 import openai
 
 app = Flask(__name__)
@@ -18,19 +16,29 @@ def get_twitter_auth():
     return tweepy.API(auth)
 
 def fetch_tweets(api):
-    # ここでキーワードや検索条件を設定して、Tweetを検索します。
     search_words = "ChatGPT"
     tweets = api.search(q=search_words, count=10)
     return [tweet.text for tweet in tweets]
 
-def translate_text(text):
-    translator = Translator()
-    return translator.translate(text, dest='ja').text
-
 def fetch_gpt_info():
     api = get_twitter_auth()
     tweets = fetch_tweets(api)
-    translated_tweets = [translate_text(tweet) for tweet in tweets]
+
+    openai.api_key = os.environ.get("OPENAI_API_KEY")
+
+    translated_tweets = []
+    for tweet in tweets:
+        response = openai.Completion.create(
+            engine="text-davinci-002",
+            prompt=f"Translate the following information about ChatGPT from English to Japanese: {tweet}",
+            max_tokens=100,
+            n=1,
+            stop=None,
+            temperature=0.5,
+        )
+        translated_tweet = response.choices[0].text.strip()
+        translated_tweets.append(translated_tweet)
+
     return translated_tweets
 
 @app.route('/')
