@@ -16,8 +16,9 @@ def get_twitter_auth():
     return tweepy.API(auth)
 
 def fetch_tweets(api):
+    # ここでキーワードや検索条件を設定して、Tweetを検索します。
     search_words = "ChatGPT"
-    tweets = api.search(q=search_words, count=10)
+    tweets = api.search_tweets(q=search_words, count=10)
     return [tweet.text for tweet in tweets]
 
 def fetch_gpt_info():
