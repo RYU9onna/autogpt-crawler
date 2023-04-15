@@ -39,9 +39,10 @@ def fetch_gpt_info(prompt1, prompt2, search_words, count):
         translated_tweets.append(translated_tweet)
 
     # Extract the most interesting news
+    interesting_tweet = translated_tweets[0]
     response = openai.Completion.create(
         engine="text-davinci-002",
-        prompt=f"{prompt2}",
+        prompt=f"{prompt2} {interesting_tweet}",
         max_tokens=100,
         n=1,
         stop=None,
