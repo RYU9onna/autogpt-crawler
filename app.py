@@ -42,7 +42,7 @@ def fetch_gpt_info(prompt1, prompt2, search_words, count):
     translated_tweets_text = "\n".join(translated_tweets)
     response = openai.Completion.create(
         engine="text-davinci-002",
-        prompt=f"{prompt2}\n{translated_tweets_text}\n\n最も注目すべきニュース:",
+        prompt=f"{prompt2}\n\n最新のChatGPTに関する情報:\n{translated_tweets_text}\n\n最も注目すべきニュース:",
         max_tokens=200,
         n=1,
         stop=None,
