@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 import os
 import tweepy
 import openai
@@ -15,15 +15,13 @@ def get_twitter_auth():
     auth.set_access_token(access_token, access_token_secret)
     return tweepy.API(auth)
 
-def fetch_tweets(api):
-    # ここでキーワードや検索条件を設定して、Tweetを検索します。
-    search_words = "ChatGPT"
-    tweets = api.search_tweets(q=search_words, count=10)
+def fetch_tweets(api, search_words, count):
+    tweets = api.search_tweets(q=search_words, count=count)
     return [tweet.text for tweet in tweets]
 
-def fetch_gpt_info():
+def fetch_gpt_info(prompt1, prompt2, search_words, count):
     api = get_twitter_auth()
-    tweets = fetch_tweets(api)
+    tweets = fetch_tweets(api, search_words, count)
 
     openai.api_key = os.environ.get("OPENAI_API_KEY")
 
@@ -31,7 +29,7 @@ def fetch_gpt_info():
     for tweet in tweets:
         response = openai.Completion.create(
             engine="text-davinci-002",
-            prompt=f"Translate the following information about ChatGPT from English to Japanese: {tweet}",
+            prompt=f"{prompt1}: {tweet}",
             max_tokens=100,
             n=1,
             stop=None,
@@ -40,12 +38,29 @@ def fetch_gpt_info():
         translated_tweet = response.choices[0].text.strip()
         translated_tweets.append(translated_tweet)
 
-    return translated_tweets
+    # Extract the most interesting news
+    response = openai.Completion.create(
+        engine="text-davinci-002",
+        prompt=f"{prompt2}",
+        max_tokens=100,
+        n=1,
+        stop=None,
+        temperature=0.5,
+    )
+    buzzworthy_tweet = response.choices[0].text.strip()
+    return translated_tweets, buzzworthy_tweet
 
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 def index():
-    translated_info = fetch_gpt_info()
-    return render_template('index.html', translated_info=translated_info)
+    if request.method == 'POST':
+        prompt1 = request.form['prompt1']
+        prompt2 = request.form['prompt2']
+        search_words = request.form['search_words']
+        count = int(request.form['count'])
+        translated_info, buzzworthy_tweet = fetch_gpt_info(prompt1, prompt2, search_words, count)
+        return render_template('index.html', translated_info=translated_info, buzzworthy_tweet=buzzworthy_tweet)
+
+    return render_template('index.html')
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
