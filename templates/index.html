@@ -7,10 +7,24 @@
 </head>
 <body>
     <h1>最新のChatGPT情報</h1>
+    <form method="POST">
+        <label for="prompt1">プロンプト1:</label>
+        <input type="text" name="prompt1" value="Translate the following information about ChatGPT from English to Japanese" required><br>
+        <label for="prompt2">プロンプト2:</label>
+        <input type="text" name="prompt2" value="この内容を読んで、なかでも最も注目ニュースだと感じたニュースを抜粋してを参照のリンクがあればそのURLも140文字以内に含めてTwitterでバズる140文字以内の情報として価値のある日本語の感想を作って" required><br>
+        <label for="search_words">検索ワード:</label>
+        <input type="text" name="search_words" value="ChatGPT" required><br>
+        <label for="count">検索数:</label>
+        <input type="number" name="count" value="10" required><br>
+        <input type="submit" value="実行">
+    </form>
+    <h2>翻訳された情報</h2>
     <ul>
         {% for info in translated_info %}
             <li>{{ info }}</li>
         {% endfor %}
     </ul>
+    <h2>注目ニュース</h2>
+    <p>{{ buzzworthy_tweet }}</p>
 </body>
 </html>
